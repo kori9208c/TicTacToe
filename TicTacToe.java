@@ -281,62 +281,43 @@ public class TicTacToe {
     }
 
     private static char[][] getCPUMove(char[][] gameState) {
-        int size = gameState.length;
-        char[][] newState = new char[size][size];
+
+        // Determine all available spaces
         List<int[]> emptySpaces = getValidMoves(gameState);
-
-        Iterator var4;
-        int[] space;
-        int row;
-        int col;
-        for(var4 = emptySpaces.iterator(); var4.hasNext(); newState[row][col] = emptySpaceSymbol) {
-            space = (int[])var4.next();
-            row = space[0];
-            col = space[1];
-            newState[row][col] = playerTwoSymbol;
+        // Check for winning move
+        for (int[] i : emptySpaces) {
+            char[][] newState = makeMove(i,playerTwoSymbol,gameState);
+            if(checkWin(newState)){
+                return newState;
+            }
+        }
+        // Check for blocking move
+        for (int[] i: emptySpaces) {
+            char[][] newState = makeMove(i,playerOneSymbol,gameState);
             if (checkWin(newState)) {
-                return newState;
+                return makeMove(i,playerTwoSymbol,gameState);
             }
         }
-
-        for(var4 = emptySpaces.iterator(); var4.hasNext(); newState[row][col] = emptySpaceSymbol) {
-            space = (int[])var4.next();
-            row = space[0];
-            col = space[1];
-            newState[row][col] = playerOneSymbol;
-            if (checkWin(newState)) {
-                newState[row][col] = playerTwoSymbol;
-                return newState;
+        // Move on center space if possible
+        for(int[] i:emptySpaces){
+            if(Arrays.equals(i,new int[]{1,1})){
+                return makeMove(new int []{1,1},playerTwoSymbol,gameState);
             }
         }
+        // Move on corner spaces if possible
+        ArrayList<int[]> availCorner=new ArrayList<>();
+        for(int[] i : emptySpaces){
+            if(Arrays.equals(i,new int[]{0,0}) || Arrays.equals(i, new int[]{0,2}) ||
+                    Arrays.equals(i, new int[]{2,0}) || Arrays.equals(i,new int[]{2,2})){
+                availCorner.add(i);
 
-        int center = size / 2;
-        if (gameState[center][center] == emptySpaceSymbol) {
-            newState[center][center] = playerTwoSymbol;
-            return newState;
-        } else {
-            int[][] corners = new int[][]{{0, 0}, {0, size - 1}, {size - 1, 0}, {size - 1, size - 1}};
-            int[][] var14 = corners;
-            col = corners.length;
-
-            for(int var8 = 0; var8 < col; ++var8) {
-                int[] corner = var14[var8];
-                int row = corner[0];
-                int col = corner[1];
-                if (gameState[row][col] == emptySpaceSymbol) {
-                    newState[row][col] = playerTwoSymbol;
-                    return newState;
-                }
-            }
-
-            if (!emptySpaces.isEmpty()) {
-                int[] space = (int[])emptySpaces.get(0);
-                newState[space[0]][space[1]] = playerTwoSymbol;
-                return newState;
-            } else {
-                return null;
             }
         }
+        if(!availCorner.isEmpty()){
+            return makeMove(availCorner.get((int)(Math.random()*emptySpaces.size())),playerTwoSymbol,gameState);
+        }
+        return makeMove(emptySpaces.get((int)(Math.random()*emptySpaces.size())),playerTwoSymbol,gameState);
+        // Move in any available spot
     }
 
     private static ArrayList<int[]> getValidMoves(char[][] gameState) {
